@@ -49,6 +49,7 @@ user_agents = [
     'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36',
 ]
 
+
 def make_up(page, assignee_name):
     return base_url + additional_url[0] \
            + str(page) + additional_url[1] \
@@ -66,6 +67,7 @@ def lets_rock(companies):
             print(page_count)
             print('let\'s rock')
             for i in range(1, page_count // 50 + 1):
+            # for i in range(1, 3):
                 print('fetching page' + str(i))
                 fetch_page(make_up(i, ic))
         except:
@@ -84,8 +86,9 @@ def fetch_page(company_url):
     for it in text:
         url = str(it.select('a')[0]['href']).strip()
         doc_number = str(it.select('td')[1].text).strip()
+        score = str(it.find_all('td')[-1].text).strip()
         try:
-            fetch_detail(base_url + url, doc_number)
+            fetch_detail(base_url + url, doc_number, score)
         except:
             with open('error_report.txt', 'w+') as f:
                 f.write('fail fetching ' + url + '\n')
@@ -93,7 +96,7 @@ def fetch_page(company_url):
             time.sleep(random.randint(0, 3) / 10)
 
 
-def fetch_detail(detail_url, doc_number):
+def fetch_detail(detail_url, doc_number, score):
     # print(detail_url)
     # print(doc_number)
     print('fetching patent: ' + str(doc_number))
@@ -117,6 +120,7 @@ def fetch_detail(detail_url, doc_number):
             if title_text in utils:
                 data_dict[utils[title_text]] = t_text
         data_dict['app_num'] = doc_number
+        data_dict['score'] = score
     insert_data(data_dict)
 
 
