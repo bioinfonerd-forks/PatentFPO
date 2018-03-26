@@ -65,7 +65,7 @@ def lets_rock(companies):
             page_count = int(str(soup.find_all(text=re.compile('Matches'))[0]).strip().split(' ')[-1])
             print(page_count)
             print('let\'s rock')
-            for i in range(1, 5):
+            for i in range(1, page_count // 50 + 1):
                 print('fetching page' + str(i))
                 fetch_page(make_up(i, ic))
         except:
