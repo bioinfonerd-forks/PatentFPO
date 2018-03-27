@@ -20,9 +20,12 @@ additional_url = ['/result.html?p=',
 # cx = sqlite3.connect('patents.db')
 
 # company_list = ['microsoft']
-company_list1 = ['google', 'nintendo', 'IBM', 'amazon', 'intel']
-company_list2 = ['microsoft', 'lenovo', 'apple', 'facebook', 'tencent']
-company_list3 = ['alibaba', 'hp', 'sony', 'baidu', 'huawei', 'amd']
+# company_list1 = ['google', 'nintendo', 'IBM', 'amazon', 'intel']
+company_list1 = ['google']
+# company_list2 = ['microsoft', 'lenovo', 'apple', 'facebook', 'tencent']
+company_list2 = ['microsoft']
+# company_list3 = ['alibaba', 'hp', 'sony', 'baidu', 'huawei', 'amd']
+company_list3 = ['apple']
 
 utils = {'Title': 'title',
          'Inventors': 'inventor',
@@ -70,16 +73,17 @@ def lets_rock(companies):
             with open('patents_cnt.txt', 'w+') as file:
                 file.write('Company: ' + str(ic) + ' Number of patents: ' + str(patents_count) + '\n')
             # for i in range(1, page_count // 50 + 1):
-            for i in range(1, min(201, patents_count // 50 + 1)):
+            # for i in range(1, min(201, patents_count // 50 + 1)):
                 # damn FPO, you can only get 200 pages of patents
-                # for i in range(1, 3):
+            for i in range(1, 3):
                 print('fetching page' + str(i))
                 fetch_page(make_up(i, ic))
         except:
             with open('error_report.txt', 'w+') as f:
                 f.write('fail fetching company ' + ic + '\n')
         else:
-            time.sleep(random.randint(0, 3) / 10)
+            # time.sleep(random.randint(0, 3) / 10)
+            time.sleep(0.1)
 
 
 def fetch_page(company_url):
@@ -98,7 +102,8 @@ def fetch_page(company_url):
             with open('error_report.txt', 'w+') as f:
                 f.write('fail fetching ' + url + '\n')
         else:
-            time.sleep(random.randint(0, 3) / 10)
+            # time.sleep(random.randint(0, 3) / 10)
+            time.sleep(0.1)
 
 
 def fetch_detail(detail_url, doc_number, score):
@@ -131,6 +136,8 @@ def fetch_detail(detail_url, doc_number, score):
 
 if __name__ == '__main__':
     # fetch_detail('http://www.freepatentsonline.com/y2017/0346746.html', 'D1234567')
+    start = time.time()
+
     p1 = Process(target=lets_rock, args=(company_list1, ))
     p2 = Process(target=lets_rock, args=(company_list2, ))
     p3 = Process(target=lets_rock, args=(company_list3, ))
@@ -142,4 +149,8 @@ if __name__ == '__main__':
     p1.join()
     p2.join()
     p3.join()
+
+    end = time.time()
+
+    print(end - start)
     # lets_rock(company_list)

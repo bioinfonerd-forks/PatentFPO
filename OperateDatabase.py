@@ -1,6 +1,6 @@
 import sqlite3
 
-cx = sqlite3.connect('patents_FPO_ver2.db')
+cx = sqlite3.connect('patents_gevent.db')
 cu = cx.cursor()
 
 cu.execute('create table if not exists patents_info '
@@ -32,7 +32,7 @@ cx.close()
 
 
 def insert_data(data_dict):
-    cx = sqlite3.connect('patents_FPO_ver2.db')
+    cx = sqlite3.connect('patents_gevent.db')
     cu = cx.cursor()
     _sql = 'INSERT INTO patents_info '
     _d1 = '('
