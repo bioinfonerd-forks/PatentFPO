@@ -17,11 +17,12 @@ additional_url = ['/result.html?p=',
                   '&sort=relevance&srch=top&query_txt=AN%2F%22',
                   '%22&patents=on']
 
-cx = sqlite3.connect('patents.db')
+# cx = sqlite3.connect('patents.db')
 
-company_list1 = ['nintendo']
-company_list2 = ['microsoft']
-company_list3 = ['apple']
+# company_list = ['microsoft']
+company_list1 = ['google', 'nintendo', 'IBM', 'amazon', 'intel']
+company_list2 = ['microsoft', 'lenovo', 'apple', 'facebook', 'tencent']
+company_list3 = ['alibaba', 'hp', 'sony', 'baidu', 'huawei', 'amd']
 
 utils = {'Title': 'title',
          'Inventors': 'inventor',
@@ -49,6 +50,7 @@ user_agents = [
     'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36',
 ]
 
+
 def make_up(page, assignee_name):
     return base_url + additional_url[0] \
            + str(page) + additional_url[1] \
@@ -62,10 +64,15 @@ def lets_rock(companies):
             r = requests.get(company_url,
                              headers={'User-Agent': random.choice(user_agents)})
             soup = BeautifulSoup(r.text, 'lxml')
-            page_count = int(str(soup.find_all(text=re.compile('Matches'))[0]).strip().split(' ')[-1])
-            print(page_count)
+            patents_count = int(str(soup.find_all(text=re.compile('Matches'))[0]).strip().split(' ')[-1])
+            print(patents_count)
             print('let\'s rock')
-            for i in range(1, 5):
+            with open('patents_cnt.txt', 'w+') as file:
+                file.write('Company: ' + str(ic) + ' Number of patents: ' + str(patents_count) + '\n')
+            # for i in range(1, page_count // 50 + 1):
+            for i in range(1, min(201, patents_count // 50 + 1)):
+                # damn FPO, you can only get 200 pages of patents
+                # for i in range(1, 3):
                 print('fetching page' + str(i))
                 fetch_page(make_up(i, ic))
         except:
@@ -79,13 +86,14 @@ def fetch_page(company_url):
     r = requests.get(company_url,
                      headers={'User-Agent': random.choice(user_agents)})
     soup = BeautifulSoup(r.text, 'lxml')
-    text = soup.find_all('tr', 'rowalt')
+    text = soup.find_all('table', class_='listing_table')[0].find_all('tr')[1:]
 
     for it in text:
         url = str(it.select('a')[0]['href']).strip()
         doc_number = str(it.select('td')[1].text).strip()
+        score = str(it.find_all('td')[-1].text).strip()
         try:
-            fetch_detail(base_url + url, doc_number)
+            fetch_detail(base_url + url, doc_number, score)
         except:
             with open('error_report.txt', 'w+') as f:
                 f.write('fail fetching ' + url + '\n')
@@ -93,7 +101,7 @@ def fetch_page(company_url):
             time.sleep(random.randint(0, 3) / 10)
 
 
-def fetch_detail(detail_url, doc_number):
+def fetch_detail(detail_url, doc_number, score):
     # print(detail_url)
     # print(doc_number)
     print('fetching patent: ' + str(doc_number))
@@ -117,6 +125,7 @@ def fetch_detail(detail_url, doc_number):
             if title_text in utils:
                 data_dict[utils[title_text]] = t_text
         data_dict['app_num'] = doc_number
+        data_dict['score'] = score
     insert_data(data_dict)
 
 
@@ -125,11 +134,11 @@ if __name__ == '__main__':
     p1 = Process(target=lets_rock, args=(company_list1, ))
     p2 = Process(target=lets_rock, args=(company_list2, ))
     p3 = Process(target=lets_rock, args=(company_list3, ))
-
+    #
     p1.start()
     p2.start()
     p3.start()
-
+    #
     p1.join()
     p2.join()
     p3.join()
